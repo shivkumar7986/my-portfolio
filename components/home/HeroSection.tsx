@@ -12,6 +12,19 @@ export default function HeroSection() {
   const containerRef = useRef<HTMLDivElement>(null);
   const loaderOverlayRef = useRef<HTMLDivElement>(null);
   const textContainerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const frameImages = useRef<HTMLImageElement[]>([]);
+
+  useEffect(() => {
+    // Preload video frames on mount (using frames 100 to 200 only)
+    frameImages.current = []; // Prevent strict mode duplication
+    for (let i = 1; i <= 200; i++) {
+      const img = new Image();
+      img.decoding = "async"; // Optimize image decoding
+      img.src = `/frames/ezgif-frame-${i.toString().padStart(3, "0")}.jpg`;
+      frameImages.current.push(img);
+    }
+  }, []);
 
   useEffect(() => {
     if (
@@ -78,46 +91,63 @@ export default function HeroSection() {
             scrollTrigger: {
               trigger: containerRef.current,
               start: "top top",
-              end: "+=200%",
-              scrub: 1,
+              end: "+=400%",
+              scrub: true,
               pin: true,
             },
           });
 
           scrollTl.to(
             textContainerRef.current,
-            {
-              y: "-20vh",
-              ease: "none",
-            },
+            { y: "-20vh", ease: "none", duration: 1 },
             0,
           );
-
-          (scrollTl.to(
+          scrollTl.to(
             fadeElements,
-            {
-              opacity: 0,
-              ease: "none",
-            },
+            { opacity: 0, ease: "none", duration: 1 },
             0,
-          ),
-            "-=0.4");
+          );
 
           scrollTl.to(
             ".shiv-text",
-            {
-              x: "-100vw",
-              ease: "power1.inOut",
-            },
-            ">",
+            { x: "-100vw", ease: "power1.inOut", duration: 1 },
+            1,
           );
           scrollTl.to(
             ".creates-text",
+            { x: "100vw", ease: "power1.inOut", duration: 1 },
+            1,
+          );
+
+          scrollTl.fromTo(
+            canvasRef.current,
+            { scale: 0, opacity: 0 },
+            { scale: 1, opacity: 1, ease: "power2.inOut", duration: 1 },
+            1,
+          );
+
+          const frameSequence = { frame: 0 };
+          scrollTl.to(
+            frameSequence,
             {
-              x: "100vw",
-              ease: "power1.inOut",
+              frame: 199, // Fixed from 200 to 199 to prevent undefined array index at the end
+              ease: "none",
+              duration: 1,
+              onUpdate: () => {
+                const canvas = canvasRef.current;
+                if (!canvas) return;
+                const ctx = canvas.getContext("2d", { alpha: false });
+                if (!ctx) return;
+                
+                const frameIndex = Math.round(frameSequence.frame);
+                const img = frameImages.current[frameIndex];
+                if (img && img.complete) {
+                  // Removed clearRect for performance, drawing fully opaque image
+                  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                }
+              },
             },
-            "<",
+            1,
           );
         },
       },
@@ -144,8 +174,8 @@ export default function HeroSection() {
     <section
       className="relative w-full h-screen overflow-hidden flex flex-col justify-between"
       style={{
-        paddingLeft: "5vw",
-        paddingRight: "5vw",
+        paddingLeft: "2vw",
+        paddingRight: "2vw",
         paddingTop: "6vh",
         paddingBottom: "4vh",
       }}
@@ -155,6 +185,15 @@ export default function HeroSection() {
       <div
         ref={loaderOverlayRef}
         className="fixed inset-0 bg-black z-40 pointer-events-none "
+      />
+
+      {/* Video Canvas Layer */}
+      <canvas
+        ref={canvasRef}
+        width={1920}
+        height={1080}
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full object-cover z-[45] pointer-events-none opacity-0"
+        style={{ transform: "scale(0)" }}
       />
 
       {/* Top layer */}
@@ -189,7 +228,7 @@ export default function HeroSection() {
             {splitText("Shiv")}
           </span>
           <span
-            className="italic text-[#cce6e6] whitespace-nowrap creates-text"
+            className="italic text-[#e8e8e8] whitespace-nowrap creates-text"
             style={{ fontFamily: "var(--font-machine), serif" }}
           >
             {splitText("Creates.")}
@@ -199,7 +238,7 @@ export default function HeroSection() {
 
       {/* Bottom footer area */}
       <div
-        className="w-full border-t-2 border-gray-400 flex flex-col md:flex-row justify-between items-center text-[10px] md:text-[16px] font-bold tracking-[0.2em] uppercase z-10 hero-fade-in opacity-0"
+        className="w-full border-t-1 border-gray-400 flex flex-col md:flex-row justify-between items-center text-[10px] md:text-[16px] font-bold tracking-[0.2em] uppercase z-10 hero-fade-in opacity-0"
         style={{
           fontFamily: "var(--font-dm-sans), sans-serif",
           paddingTop: "2rem",
