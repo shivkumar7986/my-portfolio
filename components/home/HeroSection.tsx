@@ -12,152 +12,190 @@ export default function HeroSection() {
   const containerRef = useRef<HTMLDivElement>(null);
   const loaderOverlayRef = useRef<HTMLDivElement>(null);
   const textContainerRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const frameImages = useRef<HTMLImageElement[]>([]);
-
-  useEffect(() => {
-    // Preload video frames on mount (using frames 100 to 200 only)
-    frameImages.current = []; // Prevent strict mode duplication
-    for (let i = 1; i <= 200; i++) {
-      const img = new Image();
-      img.decoding = "async"; // Optimize image decoding
-      img.src = `/frames/ezgif-frame-${i.toString().padStart(3, "0")}.jpg`;
-      frameImages.current.push(img);
-    }
-  }, []);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const blurTriggerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (
       !containerRef.current ||
       !loaderOverlayRef.current ||
-      !textContainerRef.current
+      !textContainerRef.current ||
+      !blurTriggerRef.current
     )
       return;
 
-    const tl = gsap.timeline({ delay: 0.1 });
-    const letters = containerRef.current.querySelectorAll(".hero-letter");
-    const fadeElements = containerRef.current.querySelectorAll(".hero-fade-in");
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({ delay: 0.1 });
+      const letters = containerRef.current?.querySelectorAll(".hero-letter");
+      const fadeElements = containerRef.current?.querySelectorAll(".hero-fade-in");
 
-    // Initial setup: move text to center and scale it up
-    gsap.set(textContainerRef.current, {
-      y: "-20vh",
-      scale: 0.5,
-      transformOrigin: "center center",
-    });
+      if (!letters || !fadeElements) return;
 
-    // Hide rest of the UI initially
-    gsap.set(fadeElements, { opacity: 0 });
-    gsap.set(letters, { y: 150, opacity: 0 });
-
-    tl.to(letters, {
-      y: 0,
-      opacity: 1,
-      duration: 1.5,
-      ease: "power3.out",
-      stagger: 0.05,
-    });
-
-    tl.to(
-      loaderOverlayRef.current,
-      {
-        y: "-100%",
-        duration: 1.5,
-        ease: "power3.inOut",
-        delay: 0.4,
-      },
-      "transition",
-    );
-
-    tl.to(
-      textContainerRef.current,
-      {
-        y: "0vh",
-        scale: 1,
-        duration: 1.5,
-        ease: "power3.inOut",
-        delay: 0.4,
-      },
-      "transition",
-    );
-
-    tl.to(
-      fadeElements,
-      {
-        opacity: 1,
-        duration: 1.2,
-        ease: "power2.out",
-        onComplete: () => {
-          const scrollTl = gsap.timeline({
-            scrollTrigger: {
-              trigger: containerRef.current,
-              start: "top top",
-              end: "+=400%",
-              scrub: true,
-              pin: true,
-            },
-          });
-
-          scrollTl.to(
-            textContainerRef.current,
-            { y: "-20vh", ease: "none", duration: 1 },
-            0,
-          );
-          scrollTl.to(
-            fadeElements,
-            { opacity: 0, ease: "none", duration: 1 },
-            0,
-          );
-
-          scrollTl.to(
-            ".shiv-text",
-            { x: "-100vw", ease: "power1.inOut", duration: 1 },
-            1,
-          );
-          scrollTl.to(
-            ".creates-text",
-            { x: "100vw", ease: "power1.inOut", duration: 1 },
-            1,
-          );
-
-          scrollTl.fromTo(
-            canvasRef.current,
-            { scale: 0, opacity: 0 },
-            { scale: 1, opacity: 1, ease: "power2.inOut", duration: 1 },
-            1,
-          );
-
-          const frameSequence = { frame: 0 };
-          scrollTl.to(
-            frameSequence,
-            {
-              frame: 199, // Fixed from 200 to 199 to prevent undefined array index at the end
-              ease: "none",
-              duration: 1,
-              onUpdate: () => {
-                const canvas = canvasRef.current;
-                if (!canvas) return;
-                const ctx = canvas.getContext("2d", { alpha: false });
-                if (!ctx) return;
-                
-                const frameIndex = Math.round(frameSequence.frame);
-                const img = frameImages.current[frameIndex];
-                if (img && img.complete) {
-                  // Removed clearRect for performance, drawing fully opaque image
-                  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                }
-              },
-            },
-            1,
-          );
+      // Create scroll timeline immediately to establish the pin spacer correctly.
+      // This prevents subsequent sections (like AboutSection) from calculating
+      // wrong start/end scroll triggers due to delayed layout shifts.
+      const scrollTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: "top top",
+          // Dynamically set the scroll distance based on the video duration
+          end: () => `+=${(videoRef.current?.duration || 4) * 500}`,
+          scrub: true,
+          pin: true,
         },
-      },
-      "transition+=0.5",
-    );
+      });
 
-    return () => {
-      tl.kill();
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-    };
+      // Independent scroll trigger to blur the HeroSection as it scrolls out of view (-50vh)
+      gsap.fromTo(
+        [containerRef.current, videoRef.current],
+        { filter: "blur(0px)" },
+        {
+          filter: "blur(20px)",
+          ease: "none",
+          scrollTrigger: {
+            trigger: blurTriggerRef.current,
+            start: "top bottom",
+            end: "top 50%",
+            scrub: true,
+          },
+        }
+      );
+
+      // Initial setup: move text to center and scale it up
+      gsap.set(textContainerRef.current, {
+        y: "-20vh",
+        scale: 0.5,
+        transformOrigin: "center center",
+      });
+
+      // Hide rest of the UI initially
+      gsap.set(fadeElements, { opacity: 0 });
+      gsap.set(letters, { y: 150, opacity: 0 });
+
+      tl.to(letters, {
+        y: 0,
+        opacity: 1,
+        duration: 1.5,
+        ease: "power3.out",
+        stagger: 0.05,
+      });
+
+      tl.to(
+        loaderOverlayRef.current,
+        {
+          y: "-100%",
+          duration: 1.5,
+          ease: "power3.inOut",
+          delay: 0.4,
+        },
+        "transition",
+      );
+
+      tl.to(
+        textContainerRef.current,
+        {
+          y: "0vh",
+          scale: 1,
+          duration: 1.5,
+          ease: "power3.inOut",
+          delay: 0.4,
+        },
+        "transition",
+      );
+
+      tl.to(
+        fadeElements,
+        {
+          opacity: 1,
+          duration: 1.2,
+          ease: "power2.out",
+          onComplete: () => {
+            scrollTl.to(
+              textContainerRef.current,
+              { y: "-20vh", ease: "none", duration: 1 },
+              0,
+            );
+            scrollTl.to(
+              fadeElements,
+              { opacity: 0, ease: "none", duration: 1 },
+              0,
+            );
+
+            scrollTl.to(
+              ".shiv-text",
+              { x: "-100vw", ease: "none", duration: 1 },
+              1,
+            );
+            scrollTl.to(
+              ".creates-text",
+              { x: "100vw", ease: "none", duration: 1 },
+              1,
+            );
+
+            scrollTl.fromTo(
+              videoRef.current,
+              { scale: 0, opacity: 0 },
+              { scale: 1, opacity: 1, ease: "none", duration: 1 },
+              1,
+            );
+
+            const videoProxy = { progress: 0 };
+            scrollTl.to(
+              videoProxy,
+              {
+                progress: 1,
+                ease: "none",
+                duration: 1,
+                onUpdate: () => {
+                  if (videoRef.current && videoRef.current.duration) {
+                    // Some browsers need a slight offset from the very end to avoid stopping
+                    const targetTime =
+                      videoProxy.progress * (videoRef.current.duration - 0.001);
+                    videoRef.current.currentTime = targetTime;
+                  }
+                },
+              },
+              1,
+            );
+
+            scrollTl.to(
+              ".quote-container",
+              { opacity: 1, duration: 0.1, ease: "none" },
+              1.4,
+            );
+
+            scrollTl.fromTo(
+              ".quote-line",
+              { y: "100%" },
+              { y: "0%", duration: 0.5, stagger: 0.1, ease: "power2.out" },
+              1.4,
+            );
+
+            setTimeout(() => {
+              ScrollTrigger.refresh();
+            }, 100);
+          },
+        },
+        "transition+=0.5",
+      );
+
+      // Refresh ScrollTrigger when video metadata is fully loaded to get the accurate duration
+      const handleLoadedMetadata = () => {
+        ScrollTrigger.refresh();
+      };
+      
+      if (videoRef.current) {
+        videoRef.current.addEventListener("loadedmetadata", handleLoadedMetadata);
+      }
+
+      return () => {
+        if (videoRef.current) {
+          videoRef.current.removeEventListener("loadedmetadata", handleLoadedMetadata);
+        }
+      };
+    }, containerRef);
+
+    return () => ctx.revert();
   }, []);
 
   const splitText = (text: string) => {
@@ -171,12 +209,13 @@ export default function HeroSection() {
   };
 
   return (
+    <>
     <section
-      className="relative w-full h-screen overflow-hidden flex flex-col justify-between"
+      className="relative w-full h-[100dvh] overflow-hidden flex flex-col justify-between"
       style={{
         paddingLeft: "2vw",
         paddingRight: "2vw",
-        paddingTop: "6vh",
+        paddingTop: "4vh",
         paddingBottom: "4vh",
       }}
       ref={containerRef}
@@ -187,14 +226,44 @@ export default function HeroSection() {
         className="fixed inset-0 bg-black z-40 pointer-events-none "
       />
 
-      {/* Video Canvas Layer */}
-      <canvas
-        ref={canvasRef}
-        width={1920}
-        height={1080}
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full object-cover z-[45] pointer-events-none opacity-0"
+      {/* Video Layer */}
+      <video
+        ref={videoRef}
+        src="/video/output_hq.mp4"
+        preload="auto"
+        playsInline
+        muted
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full object-cover z-[45] pointer-events-none opacity-0 mix-blend-screen"
         style={{ transform: "scale(0)" }}
       />
+
+      {/* Quote Layer */}
+      <div className="absolute right-[5vw] top-1/2 -translate-y-1/2 z-[60] flex flex-col items-end text-right pointer-events-none quote-container opacity-0">
+        <div className="overflow-hidden mb-1">
+          <p
+            className="text-[#e8e8e8] text-[12px] md:text-[2vw] font-bold uppercase tracking-widest quote-line"
+            style={{ fontFamily: "var(--font-dm-sans), sans-serif" }}
+          >
+            Those who see through the lies
+          </p>
+        </div>
+        <div className="overflow-hidden my-2 py-1">
+          <p
+            className="text-red-600 font-bold text-[30px] md:text-[5vw] leading-none uppercase tracking-tighter quote-line drop-shadow-[0_0_15px_rgba(220,38,38,0.5)]"
+            style={{ fontFamily: "var(--font-machine), serif" }}
+          >
+            SUFFERS
+          </p>
+        </div>
+        <div className="overflow-hidden mt-1">
+          <p
+            className="text-[#e8e8e8] text-[12px] md:text-[2vw] font-bold uppercase tracking-widest quote-line"
+            style={{ fontFamily: "var(--font-dm-sans), sans-serif" }}
+          >
+            the most
+          </p>
+        </div>
+      </div>
 
       {/* Top layer */}
       <div className="w-full flex justify-start z-10 hero-fade-in opacity-0">
@@ -212,7 +281,6 @@ export default function HeroSection() {
           <br />
           through motion, detail and softness.
         </p>
-        ``
       </div>
 
       {/* Center huge text */}
@@ -222,8 +290,8 @@ export default function HeroSection() {
       >
         <h1 className="text-[25vw] md:text-[17vw] leading-none flex flex-col md:flex-row items-center md:items-baseline justify-center md:justify-between w-full">
           <span
-            className="font-normal tracking-tight text-[#e8e8e8] whitespace-nowrap shiv-text"
-            style={{ fontFamily: "var(--font-breton), sans-serif" }}
+            className="italic font-normal tracking-tight text-[#e8e8e8] whitespace-nowrap shiv-text"
+            style={{ fontFamily: "var(--font-machine), sans-serif" }}
           >
             {splitText("Shiv")}
           </span>
@@ -238,7 +306,7 @@ export default function HeroSection() {
 
       {/* Bottom footer area */}
       <div
-        className="w-full border-t-1 border-gray-400 flex flex-col md:flex-row justify-between items-center text-[10px] md:text-[16px] font-bold tracking-[0.2em] uppercase z-10 hero-fade-in opacity-0"
+        className="w-full border-t border-white/20 md:border-gray-400 flex flex-col md:flex-row justify-between items-center text-[10px] md:text-[16px] font-bold tracking-[0.2em] uppercase z-10 hero-fade-in opacity-0"
         style={{
           fontFamily: "var(--font-dm-sans), sans-serif",
           paddingTop: "2rem",
@@ -266,5 +334,7 @@ export default function HeroSection() {
         </div>
       </div>
     </section>
+    <div ref={blurTriggerRef} className="w-full h-[1px] pointer-events-none" />
+    </>
   );
 }
