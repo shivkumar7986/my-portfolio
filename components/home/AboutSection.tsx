@@ -36,13 +36,13 @@ export default function AboutSection() {
         });
 
         // 1. Clear blur on section
-        tl.fromTo(section, { filter: "blur(20px)" }, { filter: "blur(0px)", duration: 0.5 });
+        tl.fromTo(section, { filter: "blur(30px)" }, { filter: "blur(0px)", duration: 0.5 });
         
         // 2. Image and Texts appear rapidly
-        tl.fromTo(image, { autoAlpha: 0, y: 40, filter: "blur(20px)" }, { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 0.8, ease: "power2.out" }, "-=0.2");
-        tl.fromTo(heading, { autoAlpha: 0, y: 40, filter: "blur(20px)" }, { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 0.8, ease: "power2.out" }, "-=0.6");
-        tl.fromTo(text, { autoAlpha: 0, y: 40, filter: "blur(20px)" }, { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 0.8, ease: "power2.out" }, "-=0.6");
-        tl.fromTo(v3, { autoAlpha: 0, y: 40, filter: "blur(20px)" }, { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 0.8, ease: "power2.out" }, "-=0.6");
+        tl.fromTo(image, { autoAlpha: 0, y: 40, filter: "blur(30px)" }, { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 0.8, ease: "power2.out" }, "-=0.2");
+        tl.fromTo(heading, { autoAlpha: 0, y: 40, filter: "blur(30px)" }, { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 0.8, ease: "power2.out" }, "-=0.6");
+        tl.fromTo(text, { autoAlpha: 0, y: 40, filter: "blur(30px)" }, { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 0.8, ease: "power2.out" }, "-=0.6");
+        tl.fromTo(v3, { autoAlpha: 0, y: 40, filter: "blur(30px)" }, { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 0.8, ease: "power2.out" }, "-=0.6");
       });
 
       // DESKTOP TIMELINE (Scrubbed and with parallax)
@@ -56,11 +56,11 @@ export default function AboutSection() {
           },
         });
 
-        tl.fromTo(section, { filter: "blur(20px)" }, { filter: "blur(0px)", duration: 1, ease: "power2.out" });
-        tl.fromTo(image, { autoAlpha: 0, y: 100, filter: "blur(20px)" }, { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 1.5, ease: "power2.out" }, "-=0.5");
-        tl.fromTo(heading, { autoAlpha: 0, y: 80, filter: "blur(20px)" }, { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 1, ease: "power2.out" }, "-=0.8");
-        tl.fromTo(text, { autoAlpha: 0, y: 80, filter: "blur(20px)" }, { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 1, ease: "power2.out" }, "-=0.8");
-        tl.fromTo(v3, { autoAlpha: 0, y: 80, filter: "blur(20px)" }, { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 1, ease: "power2.out" }, "-=0.8");
+        tl.fromTo(section, { filter: "blur(30px)" }, { filter: "blur(0px)", duration: 1, ease: "power2.out" });
+        tl.fromTo(image, { autoAlpha: 0, y: 100, filter: "blur(30px)" }, { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 1.5, ease: "power2.out" }, "-=0.5");
+        tl.fromTo(heading, { autoAlpha: 0, y: 80, filter: "blur(30px)" }, { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 1, ease: "power2.out" }, "-=0.8");
+        tl.fromTo(text, { autoAlpha: 0, y: 80, filter: "blur(30px)" }, { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 1, ease: "power2.out" }, "-=0.8");
+        tl.fromTo(v3, { autoAlpha: 0, y: 80, filter: "blur(30px)" }, { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 1, ease: "power2.out" }, "-=0.8");
         
         // Parallax drift
         tl.to(heading, { y: -120, duration: 2, ease: "none" }, "parallax");
@@ -76,7 +76,7 @@ export default function AboutSection() {
     <section
       ref={sectionRef}
       id="about"
-      className="relative w-full h-auto min-h-screen md:h-[150vh] bg-[#0a0a0a] text-white flex flex-col md:flex-row items-center py-20 px-8 md:px-0 md:py-0 overflow-hidden"
+      className="relative w-full h-auto min-h-screen md:h-[150vh]  text-white flex flex-col md:flex-row items-center py-20 px-8 md:px-0 md:py-0 overflow-hidden"
     >
       {/* Container for content */}
       <div

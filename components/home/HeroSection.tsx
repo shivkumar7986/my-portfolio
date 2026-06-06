@@ -50,7 +50,7 @@ export default function HeroSection() {
         [containerRef.current, videoRef.current],
         { filter: "blur(0px)" },
         {
-          filter: "blur(20px)",
+          filter: "blur(30px)",
           ease: "none",
           scrollTrigger: {
             trigger: blurTriggerRef.current,

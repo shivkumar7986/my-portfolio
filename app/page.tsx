@@ -20,13 +20,9 @@ export default function Home() {
       <HeroSection />
 
       <div className="bg-black relative z-10 w-full">   
-        <div className="divider container-max" />
         <AboutSection />
-        <div className="divider container-max" />
         <ProjectsPreview />
-        <div className="divider container-max" />
         <SkillsSection />
-        <div className="divider container-max" />
         <ContactCTA />
       </div>
     </>
