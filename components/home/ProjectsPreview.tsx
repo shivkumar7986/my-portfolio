@@ -96,7 +96,7 @@ export default function ProjectsPreview() {
         >
           <div className="w-full max-w-xl">
             <h2
-              className="text-[40px] md:text-[5vw] leading-[1.05] tracking-[-0.02em] font-medium mb-16 text-[#111]"
+              className="text-[40px] md:text-[4vw] leading-[1.05] tracking-[-0.02em] font-medium mb-16 text-[#111]"
               style={{ fontFamily: "var(--font-syne), sans-serif" }}
             >
               Selected work
