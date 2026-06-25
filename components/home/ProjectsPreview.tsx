@@ -61,6 +61,26 @@ export default function ProjectsPreview() {
       }
     })
 
+    // 3. Reveal Project Cards one by one as they enter the screen horizontally
+    const cards = gsap.utils.toArray<HTMLElement>('.gsap-project-card')
+    cards.forEach((card) => {
+      gsap.fromTo(card,
+        { y: 100, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 1,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: card,
+            containerAnimation: tween,
+            start: "left 80%", // Animates when the left edge of the card reaches 80% of the screen
+            toggleActions: "play none none reverse",
+          }
+        }
+      )
+    })
+
     return () => {
       ScrollTrigger.getAll().forEach(t => {
         if (t.vars.trigger === section) {
@@ -112,7 +132,7 @@ export default function ProjectsPreview() {
         {displayProjects.map((project) => (
           <div
             key={project.id}
-            className="group w-[100vw] md:w-[50vw] h-full flex flex-col justify-center shrink-0 border-r border-black/5 relative"
+            className="gsap-project-card group w-[100vw] md:w-[50vw] h-full flex flex-col justify-center shrink-0 border-r border-black/5 relative"
             style={panelPadding}
           >
             <div 
