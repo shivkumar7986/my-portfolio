@@ -1,127 +1,172 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useEffect, useRef } from 'react'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Link from 'next/link'
-import { useScrollReveal } from '@/hooks/useScrollReveal'
+import Image from 'next/image'
 import { projects } from '@/data/projects'
-import { ArrowUpRight } from 'lucide-react'
+import { MoveRight } from 'lucide-react'
+
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger)
+}
 
 export default function ProjectsPreview() {
-  const sectionRef = useScrollReveal({ y: 40, duration: 0.8 })
-  const [activeProject, setActiveProject] = useState<typeof projects[0] | null>(null)
-  const [pos, setPos] = useState({ x: 0, y: 0 })
-  const previewRef = useRef<HTMLDivElement>(null)
+  const sectionRef = useRef<HTMLElement>(null)
+  const trackRef = useRef<HTMLDivElement>(null)
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    setPos({ x: e.clientX + 20, y: e.clientY - 100 })
+  // Use the first 4 projects or all if less than 4
+  const displayProjects = projects.slice(0, Math.max(4, projects.length))
+
+  useEffect(() => {
+    if (!sectionRef.current || !trackRef.current) return
+
+    const section = sectionRef.current
+    const track = trackRef.current
+
+    // 1. Entry Animation: Card expansion effect
+    gsap.fromTo(section,
+      { 
+        clipPath: 'inset(0% 5% 0% 5% round 40px 40px 0px 0px)' 
+      },
+      {
+        clipPath: 'inset(0% 0% 0% 0% round 0px 0px 0px 0px)',
+        ease: 'none',
+        scrollTrigger: {
+          trigger: section,
+          start: 'top bottom',
+          end: 'top top',
+          scrub: true,
+        }
+      }
+    )
+
+    // 2. Horizontal Scroll Animation
+    const getScrollAmount = () => {
+      const trackWidth = track.scrollWidth
+      return -(trackWidth - window.innerWidth)
+    }
+
+    const tween = gsap.to(track, {
+      x: getScrollAmount,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: section,
+        start: 'top top',
+        end: () => `+=${track.scrollWidth - window.innerWidth}`,
+        pin: true,
+        scrub: 1.2,
+        invalidateOnRefresh: true,
+      }
+    })
+
+    return () => {
+      ScrollTrigger.getAll().forEach(t => {
+        if (t.vars.trigger === section) {
+          t.kill()
+        }
+      })
+      tween.kill()
+    }
+  }, [])
+
+  
+  const panelPadding = {
+    paddingLeft: "max(1.5rem, 5vw)",
+    paddingRight: "max(1.5rem, 5vw)",
+    paddingTop: "max(3rem, 8vh)",
+    paddingBottom: "max(3rem, 8vh)",
   }
 
-  const featuredProjects = projects.filter((p) => p.featured)
+  
+  const linkStyle = { fontFamily: "var(--font-dm-sans), sans-serif" }
+  const linkClasses = "group relative inline-flex items-center gap-3 text-[11px] font-bold tracking-[0.2em] uppercase text-[#111]/50 hover:text-[#111] transition-all duration-500 ease-out pb-1 w-fit border-b border-[#111]/20 after:content-[''] after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-full after:bg-[#111] after:origin-right after:scale-x-0 hover:after:origin-left hover:after:scale-x-100 after:transition-transform after:duration-500 after:ease-out"
 
   return (
-    <section id="projects-preview" className="section-padding">
-      <div className="container-max">
-        {/* Section header */}
-        <div ref={sectionRef} className="mb-12">
-          <div className="flex items-center gap-4 mb-4">
+    <section
+      ref={sectionRef}
+      className="h-screen w-full overflow-hidden bg-[#e8e8e8] text-[#111]"
+    >
+      <div ref={trackRef} className="flex h-full w-max">
+        {/* Panel 1: Intro */}
+        <div 
+          className="w-[100vw] md:w-[50vw] h-full flex flex-col justify-center shrink-0 bg-[#f4f4f4] border-r border-black/5"
+          style={panelPadding}
+        >
+          <div className="w-full max-w-xl">
             <h2
-              className="text-sm uppercase tracking-widest text-[var(--color-text-muted)]"
-              style={{ fontFamily: 'var(--font-dm-mono), monospace' }}
+              className="text-[40px] md:text-[5vw] leading-[1.05] tracking-[-0.02em] font-medium mb-16 text-[#111]"
+              style={{ fontFamily: "var(--font-syne), sans-serif" }}
             >
-              Selected Works
+              Selected work
+              <br />& explorations
             </h2>
-            <div className="divider flex-1" />
+            <Link href="/works" className={linkClasses} style={linkStyle}>
+              VIEW ALL PROJECTS <MoveRight className="w-[14px] h-[14px] transition-transform duration-300 group-hover:translate-x-1.5" />
+            </Link>
           </div>
         </div>
 
-        {/* Project list */}
-        <div className="space-y-0" onMouseMove={handleMouseMove}>
-          {featuredProjects.map((project, index) => (
-            <Link
-              href="/works"
-              key={project.id}
-              className="group flex items-center justify-between py-6 md:py-8 border-b border-[var(--color-border)] transition-colors duration-300 hover:border-[var(--color-text-dim)]"
-              onMouseEnter={() => setActiveProject(project)}
-              onMouseLeave={() => setActiveProject(null)}
-            >
-              <div className="flex items-baseline gap-4 md:gap-8">
-                <span
-                  className="text-xs text-[var(--color-text-dim)] tabular-nums"
-                  style={{ fontFamily: 'var(--font-dm-mono), monospace' }}
-                >
-                  {String(index + 1).padStart(2, '0')}
-                </span>
-                <h3
-                  className="text-2xl md:text-4xl lg:text-5xl font-semibold tracking-tight group-hover:text-[var(--color-accent)] transition-colors duration-300"
-                  style={{ fontFamily: 'var(--font-syne), sans-serif' }}
-                >
-                  {project.title}
-                </h3>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <span
-                  className="hidden md:inline text-xs text-[var(--color-text-dim)] uppercase tracking-wider"
-                  style={{ fontFamily: 'var(--font-dm-mono), monospace' }}
-                >
-                  {project.category}
-                </span>
-                <ArrowUpRight
-                  size={20}
-                  className="text-[var(--color-text-dim)] group-hover:text-[var(--color-text)] transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                />
-              </div>
-            </Link>
-          ))}
-        </div>
-
-        {/* View all link */}
-        <div className="mt-8 flex justify-end">
-          <Link
-            href="/works"
-            className="flex items-center gap-2 text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors duration-300"
-            style={{ fontFamily: 'var(--font-dm-mono), monospace' }}
+        {/* Project Panels */}
+        {displayProjects.map((project) => (
+          <div
+            key={project.id}
+            className="group w-[100vw] md:w-[50vw] h-full flex flex-col justify-center shrink-0 border-r border-black/5 relative"
+            style={panelPadding}
           >
-            View all projects
-            <ArrowUpRight size={14} />
-          </Link>
-        </div>
-      </div>
-
-      {/* Floating preview image */}
-      <div
-        ref={previewRef}
-        className="floating-preview hidden lg:block"
-        style={{
-          left: pos.x,
-          top: pos.y,
-          opacity: activeProject ? 1 : 0,
-        }}
-      >
-        <div
-          className="w-full h-full"
-          style={{
-            background: activeProject
-              ? `linear-gradient(135deg, ${
-                  activeProject.category === 'Web'
-                    ? '#1a1a2e, #16213e'
-                    : activeProject.category === 'App'
-                    ? '#1a2e1a, #162e21'
-                    : '#2e1a1a, #2e2116'
-                })`
-              : 'var(--color-bg-card)',
-          }}
-        >
-          <div className="w-full h-full flex items-center justify-center">
-            <span
-              className="text-lg font-semibold text-[var(--color-text-muted)]"
-              style={{ fontFamily: 'var(--font-syne), sans-serif' }}
+            <div 
+              className="w-full h-[45vh] md:h-[55vh] relative rounded-sm overflow-hidden bg-[#e8e8e8] group-hover:bg-[#e0e0e0] transition-colors duration-700"
+              style={{ marginBottom: "clamp(3rem, 8vh, 5rem)" }}
             >
-              {activeProject?.title}
-            </span>
+              <Image
+                src={project.coverImage}
+                alt={project.title}
+                fill
+                className="object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
+              />
+            </div>
+            <div className="w-full">
+              <h3
+                className="text-[28px] md:text-[2.5vw] leading-[1.1] tracking-[-0.01em] font-medium text-[#111]"
+                style={{ fontFamily: "var(--font-syne), sans-serif" }}
+              >
+                {project.title}
+              </h3>
+              <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-8 md:gap-16">
+                <p 
+                  className="text-[#111]/70 max-w-sm text-[14px] md:text-[16px] leading-relaxed font-normal"
+                  style={{ fontFamily: "var(--font-dm-sans), sans-serif" }}
+                >
+                  {project.description}
+                </p>
+                <Link href={project.link || project.github || "#"} className={linkClasses} style={linkStyle}>
+                  EXPLORE PROJECT <MoveRight className="w-[14px] h-[14px] transition-transform duration-300 group-hover:translate-x-1.5" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {/* Panel N: Outro */}
+        <div 
+          className="w-[100vw] md:w-[50vw] h-full flex flex-col justify-center items-center shrink-0 bg-[#f4f4f4]"
+          style={panelPadding}
+        >
+          <div className="w-full max-w-xl text-center flex flex-col items-center">
+            <h2
+              className="text-[32px] md:text-[3.5vw] leading-[1.1] tracking-[-0.02em] font-medium mb-16 text-[#111]"
+              style={{ fontFamily: "var(--font-syne), sans-serif" }}
+            >
+              Discover our complete collection of digital experiences, brands,
+              and platforms.
+            </h2>
+            <Link href="/works" className={linkClasses} style={linkStyle}>
+              VIEW ALL PROJECTS <MoveRight className="w-[14px] h-[14px] transition-transform duration-300 group-hover:translate-x-1.5" />
+            </Link>
           </div>
         </div>
       </div>
     </section>
-  )
+  );
 }

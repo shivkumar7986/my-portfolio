@@ -3,10 +3,10 @@ import { Syne, DM_Sans, DM_Mono, Playfair_Display } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import SmoothScrollProvider from "@/components/providers/SmoothScrollProvider";
-import CustomCursor from "@/components/ui/CustomCursor";
+// import CustomCursor from "@/components/ui/CustomCursor";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import ScrollProgress from "@/components/ui/ScrollProgress";
+// import ScrollProgress from "@/components/ui/ScrollProgress";
 
 const syne = Syne({
   subsets: ["latin"],
