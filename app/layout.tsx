@@ -81,7 +81,7 @@ export default function RootLayout({
           {/* <ScrollProgress /> */}
           {/* <Header /> */}
           <main className="flex-1">{children}</main>
-          <Footer />
+          {/* <Footer /> */}
         </SmoothScrollProvider>
       </body>
     </html>

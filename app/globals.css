@@ -146,25 +146,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .container-max {
-  max-width: 1280px;
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: 1.5rem;
-  padding-right: 1.5rem;
-}
-
-@media (min-width: 768px) {
-  .container-max {
-    padding-left: 3rem;
-    padding-right: 3rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .container-max {
-    padding-left: 6rem;
-    padding-right: 6rem;
-  }
+  padding: 0 5vw;
 }
 
 /* ===== Hero Name Scale ===== */
