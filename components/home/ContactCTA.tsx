@@ -105,19 +105,20 @@ export default function ContactCTA() {
           {/* Epic Hover Button */}
           <a 
             href="/contact" 
-            className="group relative inline-flex items-center justify-center gap-3 px-8 py-4 bg-white text-black rounded-full overflow-hidden transition-transform duration-500 hover:scale-105 active:scale-95"
+            className="group relative inline-flex items-center justify-center gap-3 bg-[#f4f4f4] rounded-full overflow-hidden transition-transform duration-500 hover:scale-105 active:scale-95"
+            style={{ padding: "clamp(1rem, 2vh, 1.25rem) clamp(2rem, 4vw, 2.5rem)" }}
           >
             {/* Dark fill sweep on hover */}
-            <div className="absolute inset-0 bg-[#111] translate-y-[101%] rounded-full transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-y-0" />
+            <div className="absolute inset-0 bg-[#0a0a0a] translate-y-[101%] rounded-full transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-y-0" />
             
             <span 
-              className="relative z-10 text-[13px] font-bold tracking-[0.2em] uppercase transition-colors duration-500 group-hover:text-white"
+              className="relative z-10 text-[13px] text-[#050505] font-bold tracking-[0.2em] uppercase transition-colors duration-500 group-hover:text-[#f4f4f4]"
               style={{ fontFamily: 'var(--font-dm-sans), sans-serif' }}
             >
               Get in touch
             </span>
             <div className="relative z-10 w-8 h-8 rounded-full bg-black/10 flex items-center justify-center transition-all duration-500 group-hover:bg-white/20 group-hover:rotate-45">
-               <ArrowUpRight size={14} className="text-black group-hover:text-white transition-colors duration-500" strokeWidth={2.5} />
+               <ArrowUpRight size={14} className="text-[#050505] group-hover:text-[#f4f4f4] transition-colors duration-500" strokeWidth={2.5} />
             </div>
           </a>
 

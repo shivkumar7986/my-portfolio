@@ -47,20 +47,20 @@ const machine = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Vis — Full-Stack Developer & UI Engineer",
+  title: "Shiv — Full-Stack Developer & UI Engineer",
   description:
     "Creative developer building precise, thoughtful web interfaces. Specialising in React, Next.js, and UI design systems.",
   openGraph: {
-    title: "Vis — Full-Stack Developer",
+    title: "Shiv — Full-Stack Developer",
     description:
       "Creative developer building precise, thoughtful web interfaces.",
-    url: "https://yoursite.com",
+    url: "https://shiv-creates.com",
     images: [{ url: "/images/og-cover.jpg" }],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Vis — Full-Stack Developer",
+    title: "Shiv — Full-Stack Developer",
     images: ["/images/og-cover.jpg"],
   },
 };
@@ -79,7 +79,7 @@ export default function RootLayout({
         <SmoothScrollProvider>
           {/* <CustomCursor /> */}
           {/* <ScrollProgress /> */}
-          {/* <Header /> */}
+          <Header />
           <main className="flex-1">{children}</main>
           {/* <Footer /> */}
         </SmoothScrollProvider>

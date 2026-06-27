@@ -25,70 +25,81 @@ export default function ProjectsPreview() {
     const section = sectionRef.current
     const track = trackRef.current
 
-    // 1. Entry Animation: Card expansion effect
-    gsap.fromTo(section,
-      { 
-        clipPath: 'inset(0% 5% 0% 5% round 40px 40px 0px 0px)' 
-      },
-      {
-        clipPath: 'inset(0% 0% 0% 0% round 0px 0px 0px 0px)',
-        ease: 'none',
-        scrollTrigger: {
-          trigger: section,
-          start: 'top bottom',
-          end: 'top top',
-          scrub: true,
-        }
-      }
-    )
+    const ctx = gsap.context(() => {
+      let mm = gsap.matchMedia()
 
-    // 2. Horizontal Scroll Animation
-    const getScrollAmount = () => {
-      const trackWidth = track.scrollWidth
-      return -(trackWidth - window.innerWidth)
-    }
-
-    const tween = gsap.to(track, {
-      x: getScrollAmount,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: section,
-        start: 'top top',
-        end: () => `+=${track.scrollWidth - window.innerWidth}`,
-        pin: true,
-        scrub: 1.2,
-        invalidateOnRefresh: true,
-      }
-    })
-
-    // 3. Reveal Project Cards one by one as they enter the screen horizontally
-    const cards = gsap.utils.toArray<HTMLElement>('.gsap-project-card')
-    cards.forEach((card) => {
-      gsap.fromTo(card,
-        { y: 100, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 1,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: card,
-            containerAnimation: tween,
-            start: "left 80%", // Animates when the left edge of the card reaches 80% of the screen
-            toggleActions: "play none none reverse",
+      // --- DESKTOP: Horizontal Scroll ---
+      mm.add("(min-width: 768px)", () => {
+        // 1. Entry Animation: Card expansion effect
+        gsap.fromTo(section,
+          { clipPath: 'inset(0% 5% 0% 5% round 40px 40px 0px 0px)' },
+          {
+            clipPath: 'inset(0% 0% 0% 0% round 0px 0px 0px 0px)',
+            ease: 'none',
+            scrollTrigger: {
+              trigger: section,
+              start: 'top bottom',
+              end: 'top top',
+              scrub: true,
+            }
           }
-        }
-      )
-    })
+        )
 
-    return () => {
-      ScrollTrigger.getAll().forEach(t => {
-        if (t.vars.trigger === section) {
-          t.kill()
-        }
+        // 2. Horizontal Scroll Animation
+        const getScrollAmount = () => -(track.scrollWidth - window.innerWidth)
+        
+        const tween = gsap.to(track, {
+          x: getScrollAmount,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: section,
+            start: 'top top',
+            end: () => `+=${track.scrollWidth - window.innerWidth}`,
+            pin: true,
+            scrub: 1.2,
+            invalidateOnRefresh: true,
+          }
+        })
+
+        // 3. Reveal Project Cards one by one horizontally
+        const cards = gsap.utils.toArray<HTMLElement>('.gsap-project-card')
+        cards.forEach((card) => {
+          gsap.fromTo(card,
+            { y: 100, opacity: 0 },
+            {
+              y: 0, opacity: 1, duration: 1, ease: "power3.out",
+              scrollTrigger: {
+                trigger: card,
+                containerAnimation: tween,
+                start: "left 80%",
+                toggleActions: "play none none reverse",
+              }
+            }
+          )
+        })
       })
-      tween.kill()
-    }
+
+      // --- MOBILE: Vertical Stack ---
+      mm.add("(max-width: 767px)", () => {
+        // Simple vertical fade ups for mobile
+        const cards = gsap.utils.toArray<HTMLElement>('.gsap-project-card, .gsap-intro-panel, .gsap-outro-panel')
+        cards.forEach((card) => {
+          gsap.fromTo(card,
+            { y: 50, opacity: 0 },
+            {
+              y: 0, opacity: 1, duration: 0.8, ease: "power3.out",
+              scrollTrigger: {
+                trigger: card,
+                start: "top 85%",
+                toggleActions: "play none none reverse",
+              }
+            }
+          )
+        })
+      })
+    }, sectionRef)
+
+    return () => ctx.revert()
   }, [])
 
   
@@ -99,19 +110,19 @@ export default function ProjectsPreview() {
     paddingBottom: "max(3rem, 8vh)",
   }
 
-  
   const linkStyle = { fontFamily: "var(--font-dm-sans), sans-serif" }
   const linkClasses = "group relative inline-flex items-center gap-3 text-[11px] font-bold tracking-[0.2em] uppercase text-[#111]/50 hover:text-[#111] transition-all duration-500 ease-out pb-1 w-fit border-b border-[#111]/20 after:content-[''] after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-full after:bg-[#111] after:origin-right after:scale-x-0 hover:after:origin-left hover:after:scale-x-100 after:transition-transform after:duration-500 after:ease-out"
 
   return (
     <section
       ref={sectionRef}
-      className="h-screen w-full overflow-hidden bg-[#e8e8e8] text-[#111]"
+      className="md:h-screen w-full overflow-hidden bg-[#e8e8e8] text-[#111]"
     >
-      <div ref={trackRef} className="flex h-full w-max">
+      <div ref={trackRef} className="flex flex-col md:flex-row md:h-full md:w-max">
+        
         {/* Panel 1: Intro */}
         <div 
-          className="w-[100vw] md:w-[50vw] h-full flex flex-col justify-center shrink-0 bg-[#f4f4f4] border-r border-black/5"
+          className="gsap-intro-panel w-full md:w-[50vw] h-[70vh] md:h-full flex flex-col justify-center shrink-0 bg-[#f4f4f4] border-b md:border-b-0 md:border-r border-black/5"
           style={panelPadding}
         >
           <div className="w-full max-w-xl">
@@ -132,12 +143,12 @@ export default function ProjectsPreview() {
         {displayProjects.map((project) => (
           <div
             key={project.id}
-            className="gsap-project-card group w-[100vw] md:w-[50vw] h-full flex flex-col justify-center shrink-0 border-r border-black/5 relative"
+            className="gsap-project-card group w-full md:w-[50vw] h-[90vh] md:h-full flex flex-col justify-center shrink-0 border-b md:border-b-0 md:border-r border-black/5 relative py-12 md:py-0"
             style={panelPadding}
           >
             <div 
               className="w-full h-[45vh] md:h-[55vh] relative rounded-sm overflow-hidden bg-[#e8e8e8] group-hover:bg-[#e0e0e0] transition-colors duration-700"
-              style={{ marginBottom: "clamp(3rem, 8vh, 5rem)" }}
+              style={{ marginBottom: "clamp(2rem, 6vh, 5rem)" }}
             >
               <Image
                 src={project.coverImage}
@@ -148,12 +159,12 @@ export default function ProjectsPreview() {
             </div>
             <div className="w-full">
               <h3
-                className="text-[28px] md:text-[2.5vw] leading-[1.1] tracking-[-0.01em] font-medium text-[#111]"
+                className="text-[28px] md:text-[2.5vw] leading-[1.1] tracking-[-0.01em] font-medium text-[#111] mb-6 md:mb-0"
                 style={{ fontFamily: "var(--font-syne), sans-serif" }}
               >
                 {project.title}
               </h3>
-              <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-8 md:gap-16">
+              <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-6 md:gap-16">
                 <p 
                   className="text-[#111]/70 max-w-sm text-[14px] md:text-[16px] leading-relaxed font-normal"
                   style={{ fontFamily: "var(--font-dm-sans), sans-serif" }}
@@ -170,7 +181,7 @@ export default function ProjectsPreview() {
 
         {/* Panel N: Outro */}
         <div 
-          className="w-[100vw] md:w-[50vw] h-full flex flex-col justify-center items-center shrink-0 bg-[#f4f4f4]"
+          className="gsap-outro-panel w-full md:w-[50vw] h-[70vh] md:h-full flex flex-col justify-center items-center shrink-0 bg-[#f4f4f4]"
           style={panelPadding}
         >
           <div className="w-full max-w-xl text-center flex flex-col items-center">
@@ -188,5 +199,5 @@ export default function ProjectsPreview() {
         </div>
       </div>
     </section>
-  );
+  )
 }

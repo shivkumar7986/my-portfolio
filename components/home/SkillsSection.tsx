@@ -131,14 +131,14 @@ export default function SkillsSection() {
                 {group.skills.map((skill) => (
                   <div 
                     key={skill} 
-                    className="premium-pill group relative inline-flex items-center justify-center rounded-full border border-white/10 bg-transparent overflow-hidden cursor-crosshair transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] hover:border-transparent hover:-translate-y-1"
+                    className="premium-pill force-hover-pill relative inline-flex items-center justify-center rounded-full border border-white/10 bg-transparent overflow-hidden cursor-crosshair transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]"
                     style={{ padding: "clamp(0.75rem, 1.5vh, 1rem) clamp(1.5rem, 3vw, 2.5rem)" }}
                   >
                     {/* Solid white fill that slides up */}
-                    <div className="absolute inset-0 bg-[#e8e8e8] translate-y-[101%] rounded-full transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-y-0" />
+                    <div className="force-hover-bg absolute inset-0 bg-[#e8e8e8] rounded-full" />
                     
                     <span 
-                      className="relative z-10 text-[13px] md:text-[14px] leading-none font-medium tracking-wide text-white/50 group-hover:text-[#111] transition-colors duration-300"
+                      className="force-hover-text relative z-10 text-[13px] md:text-[14px] leading-none font-medium tracking-wide text-white/50 transition-colors duration-300"
                       style={{ fontFamily: 'var(--font-dm-sans), sans-serif' }}
                     >
                       {skill}

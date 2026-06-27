@@ -64,7 +64,8 @@ export const HoverLink = ({ href, text }: { href: string; text: string }) => {
         {text.split("").map((char, i) => (
           <span
             key={i}
-            className="bottom-letter inline-block translate-y-[100%]"
+            className="bottom-letter inline-block"
+            style={{ transform: "translateY(100%)" }}
           >
             {char === " " ? "\u00A0" : char}
           </span>

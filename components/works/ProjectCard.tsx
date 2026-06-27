@@ -1,108 +1,106 @@
 'use client'
 
-import { ArrowUpRight } from 'lucide-react'
+import { useEffect, useRef } from 'react'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { ArrowUpRight, Code2, ExternalLink } from 'lucide-react'
+import Image from 'next/image'
 import type { Project } from '@/data/projects'
 
-export default function ProjectCard({ project }: { project: Project }) {
-  return (
-    <div className="group card overflow-hidden">
-      {/* Image area */}
-      <div className="relative aspect-[3/2] overflow-hidden bg-[var(--color-bg-soft)]">
-        {/* Gradient placeholder */}
-        <div
-          className="w-full h-full transition-transform duration-700 ease-out group-hover:scale-105"
-          style={{
-            background:
-              project.category === 'Web'
-                ? 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)'
-                : project.category === 'App'
-                ? 'linear-gradient(135deg, #1a2e1a 0%, #162e21 50%, #0f6034 100%)'
-                : 'linear-gradient(135deg, #2e1a2e 0%, #2e1621 50%, #60340f 100%)',
-          }}
-        >
-          <div className="w-full h-full flex items-center justify-center">
-            <span
-              className="text-3xl md:text-4xl font-semibold text-white/20"
-              style={{ fontFamily: 'var(--font-syne), sans-serif' }}
-            >
-              {project.title}
-            </span>
-          </div>
-        </div>
+export default function ProjectCard({ project, index }: { project: Project; index: number }) {
+  const cardRef = useRef<HTMLDivElement>(null)
 
-        {/* Hover overlay */}
-        <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-          <span className="flex items-center gap-2 text-sm font-medium text-white">
-            See Project
-            <ArrowUpRight size={16} />
-          </span>
+  useEffect(() => {
+    if (!cardRef.current) return
+
+    const ctx = gsap.context(() => {
+      gsap.fromTo(cardRef.current,
+        { y: 60, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.8,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: cardRef.current,
+            start: 'top 85%',
+            toggleActions: 'play none none reverse'
+          }
+        }
+      )
+    })
+
+    return () => ctx.revert()
+  }, [])
+
+  return (
+    <div ref={cardRef} className="group flex flex-col gap-6">
+      {/* Image Area */}
+      <div className="relative aspect-[4/3] md:aspect-[16/10] overflow-hidden rounded-sm bg-[#111]">
+        <Image
+          src={project.coverImage}
+          alt={project.title}
+          fill
+          className="object-cover object-center transition-transform duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:scale-105 opacity-80 group-hover:opacity-100"
+        />
+        
+        {/* Hover Overlay */}
+        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 backdrop-blur-[2px]">
+          <div className="translate-y-4 group-hover:translate-y-0 transition-transform duration-500 flex gap-4">
+            {project.link && (
+              <a href={project.link} target="_blank" rel="noreferrer" className="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center hover:scale-110 transition-transform duration-300">
+                <ExternalLink size={20} />
+              </a>
+            )}
+            {project.github && (
+              <a href={project.github} target="_blank" rel="noreferrer" className="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center hover:scale-110 transition-transform duration-300">
+                <Code2 size={20} />
+              </a>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Info */}
-      <div className="p-5 md:p-6">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h3
-              className="text-lg md:text-xl font-semibold tracking-tight mb-1"
-              style={{ fontFamily: 'var(--font-syne), sans-serif' }}
-            >
-              {project.title}
-            </h3>
-            <p className="text-sm text-[var(--color-text-muted)] line-clamp-2">
-              {project.description}
-            </p>
-          </div>
+      {/* Info Area */}
+      <div className="flex flex-col gap-4">
+        <div className="flex items-start justify-between gap-4 border-b border-white/10 pb-4">
+          <h3
+            className="text-2xl md:text-3xl font-bold tracking-tight text-white"
+            style={{ fontFamily: 'var(--font-syne), sans-serif' }}
+          >
+            {project.title}
+          </h3>
           <span
-            className="shrink-0 text-xs text-[var(--color-text-dim)] tabular-nums mt-1"
-            style={{ fontFamily: 'var(--font-dm-mono), monospace' }}
+            className="shrink-0 text-sm md:text-base text-white/40 mt-1"
+            style={{ fontFamily: 'var(--font-dm-sans), sans-serif' }}
           >
             {project.year}
           </span>
         </div>
 
-        {/* Tags */}
-        <div className="flex flex-wrap gap-2 mt-4">
-          {project.tags.slice(0, 3).map((tag) => (
-            <span
-              key={tag}
-              className="text-[10px] uppercase tracking-wider px-2 py-1 rounded-full border border-[var(--color-border)] text-[var(--color-text-dim)]"
-              style={{ fontFamily: 'var(--font-dm-mono), monospace' }}
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-
-        {/* Links */}
-        {(project.link || project.github) && (
-          <div className="flex items-center gap-4 mt-4 pt-4 border-t border-[var(--color-border)]">
-            {project.link && (
-              <a
-                href={project.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors duration-300"
-                style={{ fontFamily: 'var(--font-dm-mono), monospace' }}
+        <div className="flex flex-col md:flex-row justify-between gap-6">
+          <p 
+            className="text-white/60 text-[15px] leading-relaxed max-w-sm"
+            style={{ fontFamily: 'var(--font-dm-sans), sans-serif' }}
+          >
+            {project.description}
+          </p>
+          
+          <div className="flex flex-wrap gap-2.5 md:justify-end content-start max-w-[280px]">
+            {project.tags.map((tag) => (
+              <span
+                key={tag}
+                className="inline-flex items-center justify-center text-[10px] md:text-[11px] font-medium uppercase tracking-[0.15em] rounded-full border border-white/20 text-white/80"
+                style={{ 
+                  fontFamily: 'var(--font-dm-sans), sans-serif',
+                  padding: '6px 16px'
+                }}
               >
-                Live
-                <ArrowUpRight size={12} />
-              </a>
-            )}
-            {project.github && (
-              <a
-                href={project.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)] transition-colors duration-300"
-                style={{ fontFamily: 'var(--font-dm-mono), monospace' }}
-              >
-                GitHub
-                <ArrowUpRight size={12} />
-              </a>
-            )}
+                {tag}
+              </span>
+            ))}
           </div>
-        )}
+        </div>
       </div>
     </div>
   )

@@ -1,47 +1,89 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { projects } from '@/data/projects'
 import ProjectCard from './ProjectCard'
 
-const categories = ['All', ...Array.from(new Set(projects.map((p) => p.category)))]
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger)
+}
 
 export default function ProjectGrid() {
-  const [activeCategory, setActiveCategory] = useState('All')
+  const headerRef = useRef<HTMLDivElement>(null)
+  const gridRef = useRef<HTMLDivElement>(null)
 
-  const filteredProjects =
-    activeCategory === 'All'
-      ? projects
-      : projects.filter((p) => p.category === activeCategory)
+  const filteredProjects = projects
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline()
+
+      // Header Animation
+      if (headerRef.current) {
+        const titleChars = headerRef.current.querySelectorAll('.title-char')
+        const meta = headerRef.current.querySelector('.header-meta')
+        
+        gsap.set(titleChars, { yPercent: 100, opacity: 0 })
+        gsap.set(meta, { opacity: 0, y: 20 })
+
+        tl.to(titleChars, {
+          yPercent: 0,
+          opacity: 1,
+          duration: 1.2,
+          ease: 'power4.out',
+          stagger: 0.05,
+        })
+        .to(meta, {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: 'power3.out',
+        }, "-=0.8")
+      }
+    })
+
+    return () => ctx.revert()
+  }, [])
 
   return (
-    <div>
-      {/* Filter tabs */}
-      <div className="flex items-center gap-3 mb-10 flex-wrap">
-        {categories.map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setActiveCategory(cat)}
-            className="px-4 py-2 text-xs uppercase tracking-wider rounded-full border transition-all duration-300"
-            style={{
-              fontFamily: 'var(--font-dm-mono), monospace',
-              backgroundColor:
-                activeCategory === cat ? 'var(--color-accent)' : 'transparent',
-              color:
-                activeCategory === cat ? 'var(--color-bg)' : 'var(--color-text-muted)',
-              borderColor:
-                activeCategory === cat ? 'var(--color-accent)' : 'var(--color-border)',
-            }}
-          >
-            {cat}
-          </button>
-        ))}
+    <div className="w-full text-white">
+      {/* Page Header */}
+      <div ref={headerRef} className="mb-16 md:mb-24 mt-20 pt-10">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-white/10 pb-12">
+          <div className="flex items-baseline gap-4 overflow-hidden">
+            <h1
+              className="text-[12vw] md:text-[8vw] leading-[0.85] tracking-tight font-bold uppercase flex"
+              style={{ fontFamily: 'var(--font-machine), sans-serif' }}
+            >
+              {'Works.'.split('').map((char, i) => (
+                <span key={i} className="title-char inline-block">{char}</span>
+              ))}
+            </h1>
+            <span
+              className="text-lg md:text-2xl text-white/50 font-medium"
+              style={{ fontFamily: 'var(--font-syne), sans-serif' }}
+            >
+              ({projects.length.toString().padStart(2, '0')})
+            </span>
+          </div>
+          
+          <div className="header-meta max-w-sm">
+            <p 
+              className="text-base md:text-lg text-white/60 leading-relaxed"
+              style={{ fontFamily: 'var(--font-dm-sans), sans-serif' }}
+            >
+              A curated selection of digital experiences, platforms, and creative experiments built with precision.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-        {filteredProjects.map((project) => (
-          <ProjectCard key={project.id} project={project} />
+      <div ref={gridRef} className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 ">
+        {filteredProjects.map((project, idx) => (
+          <ProjectCard key={project.id} project={project} index={idx} />
         ))}
       </div>
     </div>

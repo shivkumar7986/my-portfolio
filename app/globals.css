@@ -277,3 +277,19 @@ h1, h2, h3, h4, h5, h6 {
   object-fit: cover;
 }
 
+/* ===== Premium Pill Force Hover (Bypasses Next.js Tailwind Cache) ===== */
+.force-hover-bg {
+  transform: translateY(101%);
+  transition: transform 0.5s cubic-bezier(0.23,1,0.32,1);
+}
+.force-hover-pill:hover {
+  border-color: transparent !important;
+  transform: translateY(-4px) !important;
+}
+.force-hover-pill:hover .force-hover-bg {
+  transform: translateY(0) !important;
+}
+.force-hover-pill:hover .force-hover-text {
+  color: #111 !important;
+}
+
